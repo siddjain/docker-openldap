@@ -396,6 +396,27 @@ chown -R ldap:ldap /etc/openldap
     /usr/bin/schema2ldif /etc/openldap/schema/ppolicy.schema > /etc/openldap/schema/ppolicy.ldif && \
     silent ldapadd -c -Y EXTERNAL -Q -H ldapi:/// -f /etc/openldap/schema/ppolicy.ldif
 
+    # enable hashed passwords. by default these will be stored as salted SHA1 {SSHA} which is good enough for us.
+    # see http://tutoriels.meddeb.net/openldap-password-policy-managing-users-accounts/ for reference
+    echo "** [openldap] Enabling hashed passwords"
+    cat <<EOF > /tmp/hashed-passwd.ldif
+dn: cn=module{0},cn=config
+changetype: modify
+add: olcModuleLoad
+olcModuleLoad: ppolicy
+
+dn: olcOverlay=ppolicy,olcDatabase={1}${BACKEND},cn=config
+objectClass: olcConfig
+objectClass: olcOverlayConfig
+objectClass: olcPpolicyConfig
+olcOverlay: ppolicy
+olcPPolicyDefault: cn=default,ou=ppolicies,${BASE_DN}
+olcPPolicyUseLockout: TRUE
+olcPPolicyHashCleartext: TRUE
+EOF
+
+  	silent ldapadd -Y EXTERNAL -H 'ldapi:///' -Q -f /tmp/hashed-passwd.ldif    
+
     # Read only user
     if [ "${ENABLE_READONLY_USER,,}" == "true" ]; then
       echo "** [openldap] Adding read only user"

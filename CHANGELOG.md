@@ -1,3 +1,7 @@
+## 6.4.1 2019-05-01 <siddjain at live dot com>
+
+* Enable hashed passwords
+
 ## 6.4 2019-03-29 <dave at tiredofit dot ca>
 
 * Repair BASE_DN variable that allows for sub DNs
